@@ -1,0 +1,15 @@
+package web
+
+templ Index() {
+<html lang="en">
+    <head>
+        <title>Go Chat</title>
+        <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+    </head>
+    <body>
+        <h1>Base</h1>
+        <div id="rooms" data-on-load="@get('/rooms')"></div>
+        <div id="chat" data-on-load="@get('/chat')"></div>
+    </body>
+</html>
+}
