@@ -1,7 +1,12 @@
 package web
 
 templ Rooms() {
-    <div id="rooms">
-        <h1> Rooms </h1>
-    </div>
+  <aside id="rooms" class="w-64 bg-gray-100 border-r p-4">
+    <h2 class="text-xl font-bold mb-4">Rooms</h2>
+    <ul class="space-y-2">
+      <li><button class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">General</button></li>
+      <li><button class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">Tech</button></li>
+      <li><button class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">Random</button></li>
+    </ul>
+  </aside>
 }
