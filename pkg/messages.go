@@ -6,7 +6,6 @@ import (
 	"go-chat/web"
 	"log"
 	"net/http"
-	"slices"
 	"strings"
 	"time"
 )
@@ -31,12 +30,15 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 	room := r.PathValue("room")
 	fmt.Println("Checking for", room)
 
-	m := slices.DeleteFunc(messages, func(m models.Message) bool {
-		return strings.ToLower(m.Room) != strings.ToLower(room)
-	})
+	var roomMessages []models.Message
+	for _, m := range messages {
+		if strings.ToLower(m.Room) == strings.ToLower(room) {
+			roomMessages = append(roomMessages, m)
+		}
+	}
 
 	w.Header().Set("Content-Type", "text/html")
-	err := web.Messages(m).Render(r.Context(), w)
+	err := web.Messages(room, roomMessages).Render(r.Context(), w)
 	if err != nil {
 		log.Panic(err)
 	}

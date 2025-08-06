@@ -2,10 +2,10 @@ package web
 
 import "go-chat/pkg/models"
 
-templ Messages(messages []models.Message) {
+templ Messages(room string, messages []models.Message) {
   <main id="chat" class="flex-1 flex flex-col">
     <header class="bg-white border-b p-4">
-      <h1 class="text-lg font-semibold">Chat Room: General</h1>
+      <h1 class="text-lg font-semibold">Chat Room: {room}</h1>
     </header>
 
     <section class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
