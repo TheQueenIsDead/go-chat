@@ -8,10 +8,11 @@ import (
 )
 
 func main() {
-  //TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-  // to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-  s := "gopher"
-  fmt.Printf("Hello and welcome, %s!\n", s)
+
+	_, _, err := pkg.InitNats(true, true)
+	if err != nil {
+		return
+	}
 
 	h := http.NewServeMux()
 	// The main entrypoint to the app. Content will be lazy loaded on document render.
