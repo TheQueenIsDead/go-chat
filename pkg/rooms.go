@@ -6,9 +6,12 @@ import (
 	"net/http"
 )
 
+var rooms = []string{"Daily", "Go", "Nats", "Templ", "Datastar", "Basecoat"}
+
 func Rooms(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "text/html")
-	err := web.Rooms().Render(r.Context(), w)
+	err := web.Rooms(rooms).Render(r.Context(), w)
 	if err != nil {
 		log.Panic(err)
 	}

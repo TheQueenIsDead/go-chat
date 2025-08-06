@@ -1,5 +1,28 @@
 package web
 
-templ Message() {
+import "go-chat/pkg/models"
 
+templ Messages(messages []models.Message) {
+  <main id="chat" class="flex-1 flex flex-col">
+    <header class="bg-white border-b p-4">
+      <h1 class="text-lg font-semibold">Chat Room: General</h1>
+    </header>
+
+    <section class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
+      for _, message := range messages {
+        <div class="bg-white p-3 rounded shadow">
+          <p class="text-sm text-gray-500">{message.User}</p>
+          <p>{message.Message}</p>
+        </div>
+      }
+    </section>
+
+    <footer class="p-4 border-t bg-white">
+      <input
+        type="text"
+        placeholder="Type a message..."
+        class="w-full p-2 border rounded"
+      />
+    </footer>
+  </main>
 }
