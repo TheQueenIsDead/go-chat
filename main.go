@@ -23,7 +23,8 @@ func main() {
 		}
 	})
 	h.HandleFunc("/rooms", pkg.Rooms)
-	h.HandleFunc("/messages/{room}", pkg.Messages)
+	h.HandleFunc("/rooms/{room}/messages", pkg.Messages)
+	h.HandleFunc("POST /rooms/{room}/messages", pkg.NewMessage)
 
 	err = http.ListenAndServe(":8080", h)
 	if err != nil {
