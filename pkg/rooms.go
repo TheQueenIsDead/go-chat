@@ -25,18 +25,18 @@ func Rooms(w http.ResponseWriter, r *http.Request) {
 }
 
 var messages = []models.Message{
-	{"Daily", "Welcome to the Daily chatroom 👋", "TheQueenIsDead", time.Now()},
-	{"Daily", "This chatroom is refreshed daily with no persistence.", "TheQueenIsDead", time.Now()},
-	{"Go", "Welcome to the Go chatroom 👋", "TheQueenIsDead", time.Now()},
-	{"Go", "What a delightful language!", "TheQueenIsDead", time.Now()},
-	{"NATS", "Welcome to the NATS chatroom 👋", "TheQueenIsDead", time.Now()},
-	{"NATS", "For all your event driven needs.", "TheQueenIsDead", time.Now()},
-	{"Templ", "Welcome to the Templ chatroom 👋", "TheQueenIsDead", time.Now()},
-	{"Templ", "Still not sold on this framework, but strong types are good?.", "TheQueenIsDead", time.Now()},
-	{"Datastar", "Welcome to the Datastar chatroom 👋", "TheQueenIsDead", time.Now()},
-	{"Datastar", "SSE driven UI is quite an experience.", "TheQueenIsDead", time.Now()},
-	{"Basecoat", "Welcome to the Basecoat chatroom 👋", "TheQueenIsDead", time.Now()},
-	{"Basecoat", "Please share your tips for using as little Tailwind as possible!.", "TheQueenIsDead", time.Now()},
+	{1, "Daily", "Welcome to the Daily chatroom 👋", "TheQueenIsDead", time.Now()},
+	{1, "Daily", "This chatroom is refreshed daily with no persistence.", "TheQueenIsDead", time.Now()},
+	{1, "Go", "Welcome to the Go chatroom 👋", "TheQueenIsDead", time.Now()},
+	{1, "Go", "What a delightful language!", "TheQueenIsDead", time.Now()},
+	{1, "NATS", "Welcome to the NATS chatroom 👋", "TheQueenIsDead", time.Now()},
+	{1, "NATS", "For all your event driven needs.", "TheQueenIsDead", time.Now()},
+	{1, "Templ", "Welcome to the Templ chatroom 👋", "TheQueenIsDead", time.Now()},
+	{1, "Templ", "Still not sold on this framework, but strong types are good?.", "TheQueenIsDead", time.Now()},
+	{1, "Datastar", "Welcome to the Datastar chatroom 👋", "TheQueenIsDead", time.Now()},
+	{1, "Datastar", "SSE driven UI is quite an experience.", "TheQueenIsDead", time.Now()},
+	{1, "Basecoat", "Welcome to the Basecoat chatroom 👋", "TheQueenIsDead", time.Now()},
+	{1, "Basecoat", "Please share your tips for using as little Tailwind as possible!.", "TheQueenIsDead", time.Now()},
 }
 
 var msgChan = make(chan models.Message, 100)
@@ -72,12 +72,14 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 func NewMessage(w http.ResponseWriter, r *http.Request) {
 	room := r.PathValue("room")
 	message := r.FormValue("message")
+	user := r.Header.Get("User-Agent")
 
 	fmt.Println(room, message)
 	msg := models.Message{
+		Id:      rand.Uint32(),
 		Room:    room,
 		Message: message,
-		User:    "",
+		User:    user,
 		Sent:    time.Now(),
 	}
 	messages = append(messages, msg)
@@ -97,13 +99,8 @@ func SSE(w http.ResponseWriter, r *http.Request) {
 			break
 		case msg := <-msgChan:
 			fmt.Println("Listened and got da messag", msg)
-			id := rand.Uint32()
-			html := fmt.Sprintf(`<div id="%d" class="bg-white p-3 rounded shadow">
-											<p class="text-sm text-gray-500">%s</p>
-											<p>%s</p>
-										</div>`, id, msg.User, msg.Message)
-			sse.PatchElements(html, datastar.WithSelector(fmt.Sprintf("#%s_messages", msg.Room)), datastar.WithModeAppend())
-			err := sse.ExecuteScript(fmt.Sprintf("document.getElementById(\"%d\").scrollIntoView()", id))
+			sse.PatchElementTempl(web.Message(msg), datastar.WithSelector(fmt.Sprintf("#%s_messages", msg.Room)), datastar.WithModeAppend())
+			err := sse.ExecuteScript(fmt.Sprintf("document.getElementById(\"%d\").scrollIntoView()", msg.Id))
 			if err != nil {
 				log.Println(err)
 			}

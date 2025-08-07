@@ -1,6 +1,12 @@
 package web
 
 import "go-chat/pkg/models"
+templ Message(message models.Message) {
+    <div id="{message.Id}" class="bg-white p-3 rounded shadow">
+      <p class="text-sm text-gray-500">{message.User}</p>
+      <p>{message.Message}</p>
+    </div>
+}
 
 templ Messages(room string, messages []models.Message) {
   <main  id="chat" class="flex-1 flex flex-col">
@@ -10,10 +16,7 @@ templ Messages(room string, messages []models.Message) {
 
     <section id={room + "_messages"} class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
       for _, message := range messages {
-        <div class="bg-white p-3 rounded shadow">
-          <p class="text-sm text-gray-500">{message.User}</p>
-          <p>{message.Message}</p>
-        </div>
+        @Message(message)
       }
     </section>
 
