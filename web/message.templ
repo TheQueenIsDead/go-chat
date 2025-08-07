@@ -24,6 +24,7 @@ templ Messages(room string, messages []models.Message) {
     <form>
       <input
         name="message"
+        data-bind-messageinput
         data-on-keydown={"evt.key === 'Enter' && @post('/rooms/"+ room+"/messages', {contentType: 'form'})"}
         type="text"
         placeholder="Type a message..."

@@ -75,14 +75,17 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 func NewMessage(w http.ResponseWriter, r *http.Request) {
 	room := r.PathValue("room")
 	message := r.FormValue("message")
-	user := r.RemoteAddr
+
+	sse := datastar.NewSSE(w, r)
+	signal, _ := json.Marshal(map[string]string{"messageinput": ""})
+	sse.PatchSignals(signal)
 
 	fmt.Println(room, message)
 	msg := models.Message{
 		Id:      rand.Uint32(),
 		Room:    room,
 		Message: message,
-		User:    user,
+		User:    r.Context().Value("user").(string),
 		Sent:    time.Now(),
 	}
 	messages = append(messages, msg)
