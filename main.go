@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	_, _, err := pkg.InitNats(true, true)
+	_, _, err := pkg.InitNats(true, false)
 	if err != nil {
 		return
 	}
