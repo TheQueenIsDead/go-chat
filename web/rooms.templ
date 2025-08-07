@@ -6,7 +6,7 @@ templ Rooms(rooms []string) {
     <ul class="space-y-2">
       for _, room := range rooms {
         <li>
-          <button data-on-click={"@get('/messages/" + room + "')"} data-class-bg-gray-300={"$active == '" + room + "'"} class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">{room}</button>
+          <button data-on-click={"@get('/rooms/" + room + "/messages')"} data-class-bg-gray-300={"$active == '" + room + "'"} class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">{room}</button>
         </li>
       }
     </ul>

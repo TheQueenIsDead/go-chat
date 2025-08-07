@@ -25,6 +25,7 @@ func main() {
 	h.HandleFunc("/rooms", pkg.Rooms)
 	h.HandleFunc("/rooms/{room}/messages", pkg.Messages)
 	h.HandleFunc("POST /rooms/{room}/messages", pkg.NewMessage)
+	h.HandleFunc("/sse", pkg.SSE)
 
 	err = http.ListenAndServe(":8080", h)
 	if err != nil {
