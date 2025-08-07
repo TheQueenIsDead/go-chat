@@ -12,9 +12,9 @@ templ Index() {
         <!-- Tailwind -->
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     </head>
-    <body class="h-screen flex">
+    <body data-signals="{active: 'daily'}" class="h-screen flex">
         <div id="rooms" data-on-load="@get('/rooms')"></div>
-        <div id="chat" data-on-load="@get('/messages/NATS')"></div>
+        <div id="chat" data-on-load="@get('/messages/Daily')"></div>
     </body>
 </html>
 }

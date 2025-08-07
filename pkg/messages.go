@@ -1,7 +1,8 @@
 package pkg
 
 import (
-	"fmt"
+	"encoding/json"
+	"github.com/starfederation/datastar-go/datastar"
 	"go-chat/pkg/models"
 	"go-chat/web"
 	"log"
@@ -28,8 +29,8 @@ var messages = []models.Message{
 func Messages(w http.ResponseWriter, r *http.Request) {
 
 	room := r.PathValue("room")
-	fmt.Println("Checking for", room)
 
+	// Filter messages for the current room
 	var roomMessages []models.Message
 	for _, m := range messages {
 		if strings.ToLower(m.Room) == strings.ToLower(room) {
@@ -37,9 +38,18 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "text/html")
-	err := web.Messages(room, roomMessages).Render(r.Context(), w)
+	sse := datastar.NewSSE(w, r)
+
+	// Patch the signal for the active room
+	signal, _ := json.Marshal(map[string]string{"active": room})
+	err := sse.PatchSignals(signal)
 	if err != nil {
-		log.Panic(err)
+		log.Println(err)
+	}
+
+	// Update the messages screen with the messages above
+	err = sse.PatchElementTempl(web.Messages(room, roomMessages))
+	if err != nil {
+		log.Fatal(err)
 	}
 }
