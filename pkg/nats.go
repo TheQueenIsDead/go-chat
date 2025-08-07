@@ -29,7 +29,7 @@ func InitNats(inProcess bool, enableLogging bool) (*nats.Conn, nats.JetStreamCon
 		return nil, nil, nil, err
 	}
 
-	clientOpts := []nats.Option{}
+	var clientOpts []nats.Option
 	if inProcess {
 		clientOpts = append(clientOpts, nats.InProcessServer(ns))
 	}

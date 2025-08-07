@@ -9,7 +9,7 @@ This was a fun experiment in order to gain experience with the following technol
  - [NATS](https://nats.io/)
 
 I've previously relied on frameworks such as [Echo](https://echo.labstack.com/), which is wonderful! 
-However, I've been curious about using only the latest Golang standard library in it's place.
+However, I've been curious about using only the latest Golang standard library in its place.
 
 ## Development
 
