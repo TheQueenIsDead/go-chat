@@ -12,6 +12,7 @@ require (
 	github.com/moby/moby v28.3.3+incompatible
 	github.com/nats-io/nats-server/v2 v2.11.7
 	github.com/nats-io/nats.go v1.44.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/starfederation/datastar-go v1.0.1
 )
 

@@ -2,40 +2,36 @@ package pkg
 
 import (
 	"context"
-	"fmt"
 	"github.com/moby/moby/pkg/namesgenerator"
 	"github.com/nats-io/nats.go"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
 type Server struct {
 	http *http.Server
 	js   nats.JetStreamContext
+	log  *logrus.Logger
 }
 
 func NewServer() *Server {
 
 	s := new(Server)
 
+	// Logging
+	s.log = logrus.New()
+	s.log.SetLevel(logrus.DebugLevel)
+
 	// Configure NATS
-	_, js, _, err := InitNats(true, true)
+	_, js, _, err := InitNats(true, false)
 	if err != nil {
-		fmt.Println(err)
-		return s
+		s.log.Panic(err)
 	}
 	s.js = js
 
 	// Configure HTTP
 	h := http.NewServeMux()
-	// The main entrypoint to the app. Content will be lazy loaded on document render.
-	h.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		err := Index().Render(r.Context(), w)
-		if err != nil {
-			log.Panic(err)
-		}
-	})
-
+	h.HandleFunc("/", s.Index)
 	h.HandleFunc("/rooms", s.GetRooms)
 	h.HandleFunc("/rooms/{room}/messages", s.GetMessages)
 	h.HandleFunc("POST /rooms/{room}/messages", s.PutMessage)
@@ -47,6 +43,7 @@ func NewServer() *Server {
 
 	return s
 }
+
 func (s *Server) Run() error {
 	return s.http.ListenAndServe()
 }

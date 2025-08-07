@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nats-io/nats.go"
+	"github.com/sirupsen/logrus"
 	"github.com/starfederation/datastar-go/datastar"
-	"log"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -38,11 +38,18 @@ var (
 	}
 )
 
-func (s *Server) GetRooms(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	err := RoomsComponent(rooms).Render(r.Context(), w)
+func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
+	err := Index().Render(r.Context(), w)
 	if err != nil {
-		log.Panic(err)
+		s.log.Error(err)
+	}
+}
+
+func (s *Server) GetRooms(w http.ResponseWriter, r *http.Request) {
+	sse := datastar.NewSSE(w, r)
+	err := sse.PatchElementTempl(RoomsComponent(rooms))
+	if err != nil {
+		s.log.Error(err)
 	}
 }
 
@@ -61,20 +68,30 @@ func (s *Server) GetMessages(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 
 	// Patch the signal for the active room
-	signal, _ := json.Marshal(map[string]string{"active": room})
-	err := sse.PatchSignals(signal)
+	signal, err := json.Marshal(map[string]string{"active": room})
 	if err != nil {
-		log.Println(err)
+		s.log.Error(err)
+		return
+	}
+	err = sse.PatchSignals(signal)
+	if err != nil {
+		s.log.Error(err)
+		return
 	}
 
 	// Update the messages screen with the messages above
 	err = sse.PatchElementTempl(MessagesComponent(room, roomMessages))
 	if err != nil {
-		log.Fatal(err)
+		s.log.Error(err)
+		return
 	}
 
 	// Signal the client to scroll to the newest message
-	sse.ExecuteScript(fmt.Sprintf("document.getElementById(\"%d\").scrollIntoView()", roomMessages[len(roomMessages)-1].Id))
+	err = sse.ExecuteScript(fmt.Sprintf("document.getElementById(\"%d\").scrollIntoView()", roomMessages[len(roomMessages)-1].Id))
+	if err != nil {
+		s.log.Error(err)
+		return
+	}
 }
 
 func (s *Server) PutMessage(w http.ResponseWriter, r *http.Request) {
@@ -82,10 +99,17 @@ func (s *Server) PutMessage(w http.ResponseWriter, r *http.Request) {
 	message := r.FormValue("message")
 
 	sse := datastar.NewSSE(w, r)
-	signal, _ := json.Marshal(map[string]string{"messageinput": ""})
-	sse.PatchSignals(signal)
+	signal, err := json.Marshal(map[string]string{"messageinput": ""})
+	if err != nil {
+		s.log.Error(err)
+		return
+	}
+	err = sse.PatchSignals(signal)
+	if err != nil {
+		s.log.Error(err)
+		return
+	}
 
-	fmt.Println(room, message)
 	msg := Message{
 		Id:      rand.Uint32(),
 		Room:    room,
@@ -98,40 +122,49 @@ func (s *Server) PutMessage(w http.ResponseWriter, r *http.Request) {
 	// Publish the message to NATS
 	data, err := json.Marshal(msg)
 	if err != nil {
-		fmt.Println(err)
+		s.log.Error(err)
+		return
 	}
 	_, err = s.js.PublishAsync("messages", data)
 	if err != nil {
-		fmt.Println(err)
+		s.log.Error(err)
 	}
-	fmt.Println("Published to NATS!!!", message)
-
+	s.log.WithFields(logrus.Fields{"message": msg.Message, "user": msg.User}).Debug("published to nats")
 }
 
 func (s *Server) SSE(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
-	ctx := r.Context()
-	fmt.Println("Subscwibin")
-	_, _ = s.js.Subscribe("messages", func(msg *nats.Msg) {
+	s.log.WithField("user", r.Context().Value("user")).Debug("client subscribing")
+	sub, err := s.js.Subscribe("messages", func(msg *nats.Msg) {
 		var message Message
 		err := json.Unmarshal(msg.Data, &message)
 		if err != nil {
-			fmt.Println("Failed to unmarshal")
+			s.log.Error(err)
+			return
 		}
-		fmt.Println("Listened and got da NATS messag", msg)
-		sse.PatchElementTempl(MessageComponent(message), datastar.WithSelector(fmt.Sprintf("#%s_messages", message.Room)), datastar.WithModeAppend())
+		err = sse.PatchElementTempl(MessageComponent(message), datastar.WithSelector(fmt.Sprintf("#%s_messages", message.Room)), datastar.WithModeAppend())
+		if err != nil {
+			s.log.Error(err)
+			return
+		}
 		err = sse.ExecuteScript(fmt.Sprintf("document.getElementById(\"%d\").scrollIntoView()", message.Id))
 		if err != nil {
-			log.Println(err)
+			s.log.Error(err)
+			return
 		}
 		return
 	})
-
-	select {
-	case <-ctx.Done():
-		fmt.Println(ctx.Err())
-		break
+	if err != nil {
+		s.log.Error(err)
+		return
 	}
 
-	fmt.Println("Getting da heck outta here")
+	select {
+	case <-r.Context().Done():
+		s.log.WithField("err", r.Context().Err()).Debug("context done")
+		if err := sub.Unsubscribe(); err != nil {
+			s.log.Error(err)
+		}
+		break
+	}
 }
