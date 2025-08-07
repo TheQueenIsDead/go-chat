@@ -45,6 +45,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) Run() error {
+	s.log.Infof("Listening on port %s", s.http.Addr)
 	return s.http.ListenAndServe()
 }
 
