@@ -2,7 +2,7 @@ package web
 
 import "go-chat/pkg/models"
 templ Message(message models.Message) {
-    <div id="{message.Id}" class="bg-white p-3 rounded shadow">
+    <div id={message.Id} class="bg-white p-3 rounded shadow">
       <p class="text-sm text-gray-500">{message.User}</p>
       <p>{message.Message}</p>
     </div>

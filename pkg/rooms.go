@@ -67,12 +67,15 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Signal the client to scroll to the newest message
+	sse.ExecuteScript(fmt.Sprintf("document.getElementById(\"%d\").scrollIntoView()", roomMessages[len(roomMessages)-1].Id))
 }
 
 func NewMessage(w http.ResponseWriter, r *http.Request) {
 	room := r.PathValue("room")
 	message := r.FormValue("message")
-	user := r.Header.Get("User-Agent")
+	user := r.RemoteAddr
 
 	fmt.Println(room, message)
 	msg := models.Message{
