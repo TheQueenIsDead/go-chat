@@ -1,0 +1,69 @@
+package pkg
+
+templ Index() {
+<html lang="en">
+    <head>
+        <title>Go Chat</title>
+        <!-- Datastar -->
+        <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+        <!-- Basecoat -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.1/dist/basecoat.cdn.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.1/dist/js/all.min.js" defer></script>
+        <!-- Tailwind -->
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    </head>
+    <body data-signals="{active: 'daily'}" class="h-screen flex">
+        <div id="rooms" data-on-load="@get('/rooms')"></div>
+        <div id="chat" data-on-load="@get('/rooms/Daily/messages')"></div>
+    </body>
+    <div data-on-load="@get('/sse')"></div>
+</html>
+}
+
+templ RoomsComponent(rooms []string) {
+  <aside id="rooms" class="w-64 bg-gray-100 border-r p-4">
+    <h2 class="text-xl font-bold mb-4">Rooms</h2>
+    <ul class="space-y-2">
+      for _, room := range rooms {
+        <li>
+          <button data-on-click={"@get('/rooms/" + room + "/messages')"} data-class-bg-gray-300={"$active == '" + room + "'"} class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">{room}</button>
+        </li>
+      }
+    </ul>
+  </aside>
+}
+
+
+templ MessageComponent(message Message) {
+    <div id={message.Id} class="bg-white p-3 rounded shadow">
+      <p class="text-sm text-gray-500">{message.User}</p>
+      <p>{message.Message}</p>
+    </div>
+}
+
+templ MessagesComponent(room string, messages []Message) {
+  <main  id="chat" class="flex-1 flex flex-col">
+    <header class="bg-white border-b p-4">
+      <h1 class="text-lg font-semibold">Chat Room: {room}</h1>
+    </header>
+
+    <section id={room + "_messages"} class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
+      for _, message := range messages {
+        @MessageComponent(message)
+      }
+    </section>
+
+    <footer class="p-4 border-t bg-white">
+    <form>
+      <input
+        name="message"
+        data-bind-messageinput
+        data-on-keydown={"evt.key === 'Enter' && @post('/rooms/"+ room+"/messages', {contentType: 'form'})"}
+        type="text"
+        placeholder="Type a message..."
+        class="w-full p-2 border rounded"
+      />
+      </form>
+    </footer>
+  </main>
+}

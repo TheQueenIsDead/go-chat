@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func InitNats(inProcess bool, enableLogging bool) (*nats.Conn, *server.Server, error) {
+func InitNats(inProcess bool, enableLogging bool) (*nats.Conn, nats.JetStreamContext, *server.Server, error) {
 
 	opts := &server.Options{
 		ServerName:      "embedded_server",
@@ -17,7 +17,7 @@ func InitNats(inProcess bool, enableLogging bool) (*nats.Conn, *server.Server, e
 
 	ns, err := server.NewServer(opts)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	if enableLogging {
@@ -26,7 +26,7 @@ func InitNats(inProcess bool, enableLogging bool) (*nats.Conn, *server.Server, e
 	go ns.Start()
 
 	if !ns.ReadyForConnections(5 * time.Second) {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	clientOpts := []nats.Option{}
@@ -36,9 +36,27 @@ func InitNats(inProcess bool, enableLogging bool) (*nats.Conn, *server.Server, e
 
 	nc, err := nats.Connect(nats.DefaultURL, clientOpts...)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return nc, ns, err
+	streamConfig := nats.StreamConfig{
+		Name:        "messages",
+		Description: "",
+		Subjects:    []string{"messages"},
+		Retention:   nats.LimitsPolicy,
+		MaxAge:      24 * time.Hour,
+		Replicas:    1,
+		NoAck:       false,
+	}
+	js, err := nc.JetStream()
+	if err != nil {
+		return nil, nil, nil, err
+	}
 
+	_, err = js.AddStream(&streamConfig)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return nc, js, ns, err
 }
