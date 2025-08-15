@@ -161,9 +161,13 @@ func (s *Server) SSE(w http.ResponseWriter, r *http.Request) {
 
 	select {
 	case <-r.Context().Done():
-		s.log.WithField("err", r.Context().Err()).Debug("context done")
+		logger := s.log.WithFields(logrus.Fields{
+			"user": r.Context().Value("user"),
+			"err":  r.Context().Err(),
+		})
+		logger.Debug("context done")
 		if err := sub.Unsubscribe(); err != nil {
-			s.log.Error(err)
+			logger.Error(err)
 		}
 		break
 	}
