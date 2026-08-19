@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/TheQueenIsDead/go-chat/compare/v1.0.0...v1.1.0) (2026-08-19)
+
+
+### Features
+
+* vendor third party dependencies to remove reliance on CDN and explicitly pin versions ([19a6eaf](https://github.com/TheQueenIsDead/go-chat/commit/19a6eaf92fc3f05065935dd6f965da2ab18c16a6))
+
+
+### Bug Fixes
+
+* ensure websocket connection to chatroom remains open when hidden ([b1d3fda](https://github.com/TheQueenIsDead/go-chat/commit/b1d3fda428dc8a90458b40ca15a1efb362f64cc5))
+
 ## 1.0.0 (2025-08-07)
 
 
