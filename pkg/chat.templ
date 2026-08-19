@@ -12,11 +12,11 @@ templ Index() {
         <!-- Tailwind -->
         <script src="/assets/tailwindcss/v4.3.3/index.global.js"></script>
     </head>
-    <body data-signals="{active: 'daily'}" class="h-screen flex">
-        <div id="rooms" data-on-load="@get('/rooms')"></div>
-        <div id="chat" data-on-load="@get('/rooms/Daily/messages')"></div>
+    <body data-signals="{active: 'Daily'}" class="h-screen flex">
+        <div id="rooms" data-init="@get('/rooms')"></div>
+        <div id="chat" data-init="@get('/rooms/Daily/messages')"></div>
     </body>
-    <div data-on-load="@get('/sse', {openWhenHidden: true})"></div>
+    <div data-init="@get('/sse', {openWhenHidden: true})"></div>
 </html>
 }
 
@@ -26,7 +26,7 @@ templ RoomsComponent(rooms []string) {
     <ul class="space-y-2">
       for _, room := range rooms {
         <li>
-          <button data-on-click={"@get('/rooms/" + room + "/messages')"} data-class-bg-gray-300={"$active == '" + room + "'"} class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">{room}</button>
+           <button data-on:click={"@get('/rooms/" + room + "/messages')"} data-class:bg-gray-300={"$active == '" + room + "'"} class="w-full text-left px-3 py-2 rounded hover:bg-gray-200">{room}</button>
         </li>
       }
     </ul>
@@ -57,8 +57,8 @@ templ MessagesComponent(room string, messages []Message) {
     <form>
       <input
         name="message"
-        data-bind-messageinput
-        data-on-keydown={"evt.key === 'Enter' && @post('/rooms/"+ room+"/messages', {contentType: 'form'})"}
+        data-bind:messageinput
+        data-on:keydown={"evt.key === 'Enter' && @post('/rooms/"+ room+"/messages', {contentType: 'form'})"}
         type="text"
         placeholder="Type a message..."
         class="w-full p-2 border rounded"
