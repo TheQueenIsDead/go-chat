@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/TheQueenIsDead/go-chat/compare/v1.1.0...v1.2.0) (2026-08-20)
+
+
+### Features
+
+* leverage basecoat more with collapsible sidebar ([ec7b86f](https://github.com/TheQueenIsDead/go-chat/commit/ec7b86f443c1c4f4e48f6aa8792ec4ac47e89ac4))
+
 ## [1.1.0](https://github.com/TheQueenIsDead/go-chat/compare/v1.0.0...v1.1.0) (2026-08-19)
 
 
